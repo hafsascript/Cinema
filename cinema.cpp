@@ -2,9 +2,8 @@
 using namespace std;
 
 int main(){
-    cout<<"Hello"<<endl;
-    cout<<"trial"<<endl;
-    cout<<"cinema"<<endl;
-    cout<<"cinemasystem"<<endl;
+    cout<<"Testing"<<endl;
+    cout<<"Rainbow kitten surprise"<<endl;
+    cout<<"When it lands"<<endl;
     return 0;
 }
