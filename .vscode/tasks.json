@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-std=c++17",
+                "-I/opt/homebrew/Cellar/sfml/2.6.2/include",             
+                "-I/opt/homebrew/Cellar/sfml/2.6.2/include/SFML",        
+                "-L/opt/homebrew/Cellar/sfml/2.6.2/lib",                 
+                "-lsfml-graphics",                                        
+                "-lsfml-window",                                          
+                "-lsfml-system",                                          
+                "sfml.cpp",                                               
+                "-o", "your_program_name"                                 
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Generated task for building the project"
+        }
+    ]
+}
