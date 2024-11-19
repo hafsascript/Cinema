@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-
 using namespace std;
 
 class Movie {
@@ -13,6 +12,7 @@ private:
     vector<string> showtimes;
     int duration;
     string leadCast;
+    
 
 public:
     Movie(string title, string genre, const vector<string>& showtimes, int duration, string leadCast);
@@ -28,6 +28,9 @@ public:
 
     static void addMovie(vector<Movie*>& movieList, const string& title, const string& genre, const vector<string>& showtimes, int duration, const string& leadCast);
     static void removeMovie(vector<Movie*>& movieList, const string& title);
+
+    static void saveMoviesToFile(const vector<Movie*>& movieList, const string& filename);  // New method
+    static void loadMoviesFromFile(vector<Movie*>& movieList, const string& filename);     // New method
 };
 
 #endif

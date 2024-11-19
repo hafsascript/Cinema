@@ -1,25 +1,23 @@
 #include "gui.h"
 #include <iostream>
 
-GUI::GUI() {
-    
-    window.create(sf::VideoMode(800, 600), "Cinema Management System");
+using namespace std;
 
-    
+GUI::GUI() {
+    window.create(sf::VideoMode(1200, 800), "Cinema Management System");
+
     if (!font.loadFromFile("assets/monaco.ttf")) {
-        std::cerr << "Error loading font!" << std::endl;
+        cerr << "Error loading font!" << endl;
     }
 }
 
-void GUI::createButton(const std::string& label, float x, float y, float width, float height) {
-    
-    auto button = std::make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
+void GUI::createButton(const string& label, float x, float y, float width, float height) {
+    auto button = make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
     button->setPosition(x, y);
     button->setFillColor(sf::Color::Green);  
     buttons.push_back(std::move(button));
 
-    
-    auto text = std::make_unique<sf::Text>();
+    auto text = make_unique<sf::Text>();
     text->setFont(font);
     text->setString(label);
     text->setCharacterSize(24);
@@ -31,10 +29,9 @@ void GUI::createButton(const std::string& label, float x, float y, float width, 
 void GUI::display() {
     window.clear();
 
-    
     for (size_t i = 0; i < buttons.size(); ++i) {
-        window.draw(*buttons[i]);          
-        window.draw(*buttonLabels[i]);     
+        window.draw(*buttons[i]);
+        window.draw(*buttonLabels[i]);
     }
 
     window.display();
@@ -53,11 +50,23 @@ sf::RenderWindow& GUI::getWindow() {
     return window;
 }
 
-std::vector<std::unique_ptr<sf::RectangleShape>>& GUI::getButtonShapes() {
+vector<unique_ptr<sf::RectangleShape>>& GUI::getButtonShapes() {
     return buttons;
 }
 
-std::vector<std::unique_ptr<sf::Text>>& GUI::getButtonLabels() {
+vector<unique_ptr<sf::Text>>& GUI::getButtonLabels() {
     return buttonLabels;
 }
+
+void GUI::setFont(const sf::Font& font) {
+    this->font = font;
+}
+
+void GUI::displayBookingConfirmation(const string& message) {
+    sf::Text confirmationText(message, font, 24);
+    confirmationText.setPosition(400, 500);
+    confirmationText.setFillColor(sf::Color::White);
+    window.draw(confirmationText);
+}
+
 

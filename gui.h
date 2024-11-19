@@ -5,23 +5,29 @@
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <vector>
-#include <memory>  
+#include <memory> 
+
+using namespace std;
 
 class GUI {
 private:
     sf::RenderWindow window;
-    std::vector<std::unique_ptr<sf::RectangleShape>> buttons;  
-    std::vector<std::unique_ptr<sf::Text>> buttonLabels;      
+    vector<unique_ptr<sf::RectangleShape>> buttons;  
+    vector<unique_ptr<sf::Text>> buttonLabels;      
     sf::Font font;                                           
+
 public:
     GUI();
-    void createButton(const std::string& label, float x, float y, float width, float height);
+    void createButton(const string& label, float x, float y, float width, float height);
     void display();
     bool isButtonPressed(const sf::RectangleShape& button, sf::Event& event);
     sf::RenderWindow& getWindow();
-    std::vector<std::unique_ptr<sf::RectangleShape>>& getButtonShapes();  
-    std::vector<std::unique_ptr<sf::Text>>& getButtonLabels();            
+    vector<unique_ptr<sf::RectangleShape>>& getButtonShapes();  
+    vector<unique_ptr<sf::Text>>& getButtonLabels();
+    void setFont(const sf::Font& font);
+    void displayBookingConfirmation(const string& message);
 };
 
 #endif
+
 
