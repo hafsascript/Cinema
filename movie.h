@@ -3,6 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "seating.h"  
+
 using namespace std;
 
 class Movie {
@@ -12,8 +15,7 @@ private:
     vector<string> showtimes;
     int duration;
     string leadCast;
-    
-
+    map<string, Seating*> showtimeSeatingMap;  
 public:
     Movie(string title, string genre, const vector<string>& showtimes, int duration, string leadCast);
     
@@ -22,18 +24,19 @@ public:
     string getLeadCast() const;
     vector<string> getShowtimes() const;
     int getDuration() const;
-
+    Seating* getSeatingForShowtime(const string& showtime);  
     void addShowtime(const string& showtime);
     void removeShowtime(const string& showtime);
 
     static void addMovie(vector<Movie*>& movieList, const string& title, const string& genre, const vector<string>& showtimes, int duration, const string& leadCast);
     static void removeMovie(vector<Movie*>& movieList, const string& title);
 
-    static void saveMoviesToFile(const vector<Movie*>& movieList, const string& filename);  // New method
-    static void loadMoviesFromFile(vector<Movie*>& movieList, const string& filename);     // New method
+    static void saveMoviesToFile(const vector<Movie*>& movieList, const string& filename);
+    static void loadMoviesFromFile(vector<Movie*>& movieList, const string& filename);
 };
 
 #endif
+
 
 
 

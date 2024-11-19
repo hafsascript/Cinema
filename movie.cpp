@@ -5,7 +5,12 @@
 using namespace std;
 
 Movie::Movie(string title, string genre, const vector<string>& showtimes, int duration, string leadCast)
-    : title(title), genre(genre), showtimes(showtimes), duration(duration), leadCast(leadCast) {}
+    : title(title), genre(genre), showtimes(showtimes), duration(duration), leadCast(leadCast) {
+    
+    for (const auto& showtime : showtimes) {
+        showtimeSeatingMap[showtime] = new Seating(5, 5);  
+    }
+}
 
 string Movie::getTitle() const {
     return title;
@@ -27,14 +32,24 @@ int Movie::getDuration() const {
     return duration;
 }
 
+Seating* Movie::getSeatingForShowtime(const string& showtime) {
+    if (showtimeSeatingMap.find(showtime) != showtimeSeatingMap.end()) {
+        return showtimeSeatingMap[showtime];
+    }
+    return nullptr;  
+}
+
 void Movie::addShowtime(const string& showtime) {
     showtimes.push_back(showtime);
+    showtimeSeatingMap[showtime] = new Seating(5, 5);  
 }
 
 void Movie::removeShowtime(const string& showtime) {
     for (auto it = showtimes.begin(); it != showtimes.end(); ++it) {
         if (*it == showtime) {
             showtimes.erase(it);
+            delete showtimeSeatingMap[showtime]; 
+            showtimeSeatingMap.erase(showtime);
             return;
         }
     }
@@ -56,8 +71,9 @@ void Movie::removeMovie(vector<Movie*>& movieList, const string& title) {
         }
     }
     cout << "Movie \"" << title << "\" not found!" << endl;  
-}
 
+
+}
 
 void Movie::saveMoviesToFile(const vector<Movie*>& movieList, const string& filename) {
     ofstream outFile(filename);

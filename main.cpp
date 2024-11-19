@@ -105,13 +105,10 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                 vector<string> showtimes = selectedMovie->getShowtimes();
                 int showtimeChoice = -1;
                 cout << "Select a showtime for \"" << selectedMovie->getTitle() << "\":" << endl;
-
-               
                 for (size_t j = 0; j < showtimes.size(); ++j) {
                     cout << j + 1 << ". " << showtimes[j] << endl;
                 }
 
-                
                 cout << "Enter showtime number: ";
                 cin >> showtimeChoice;
                 cin.ignore();
@@ -119,35 +116,40 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                 if (showtimeChoice < 1 || showtimeChoice > showtimes.size()) {
                     cout << "Invalid showtime choice!" << endl;
                 } else {
-                    cout << "You selected showtime: " << showtimes[showtimeChoice - 1] << endl;
+                    string selectedShowtime = showtimes[showtimeChoice - 1];
+                    cout << "You selected showtime: " << selectedShowtime << endl;
 
-                    
-                    bool seatSelected = false;
-                    while (!seatSelected && gui.getWindow().isOpen()) {
-                        while (gui.getWindow().pollEvent(event)) {
-                            if (event.type == sf::Event::Closed) {
-                                gui.getWindow().close();
-                                return;
-                            }
-                            if (event.type == sf::Event::MouseButtonPressed) {
-                                
-                                seatSelected = seating.handleSeatSelection(event, 50, 250, 40, 40, 10);
-                                if (seatSelected) {
-                                    cout << "Seat booked successfully!" << endl;
+                    Seating* seatingForShowtime = selectedMovie->getSeatingForShowtime(selectedShowtime);
+
+                    if (seatingForShowtime) {
+                        bool seatSelected = false;
+                        while (!seatSelected && gui.getWindow().isOpen()) {
+                            while (gui.getWindow().pollEvent(event)) {
+                                if (event.type == sf::Event::Closed) {
+                                    gui.getWindow().close();
+                                    return;
+                                }
+                                if (event.type == sf::Event::MouseButtonPressed) {
+                                    seatSelected = seatingForShowtime->handleSeatSelection(event, 50, 250, 40, 40, 10);
+                                    if (seatSelected) {
+                                        cout << "Seat booked successfully!" << endl;
+                                    }
                                 }
                             }
-                        }
 
-                        
-                        gui.getWindow().clear();
-                        seating.displaySeats(gui.getWindow(), 50, 250, 40, 40, 10);
-                        gui.getWindow().display();
+                            gui.getWindow().clear();
+                            seatingForShowtime->displaySeats(gui.getWindow(), 50, 250, 40, 40, 10);
+                            gui.getWindow().display();
+                        }
+                    } else {
+                        cout << "No seating arrangement found for this showtime." << endl;
                     }
                 }
             }
         }
     }
 }
+
 
 
 
