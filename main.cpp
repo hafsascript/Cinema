@@ -5,6 +5,7 @@
 #include "seating.h"
 
 using namespace std;
+string lastSavedFile = "default_movies.txt"; 
 
 void showAdminOptions(GUI& gui) {
     gui.createButton("Add Movie", 50, 50, 200, 50);
@@ -15,8 +16,9 @@ void showAdminOptions(GUI& gui) {
 }
 
 void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
-    string filename = "movies.txt"; 
-    Movie::loadMoviesFromFile(movieList, filename);
+    if (movieList.empty()) {
+        Movie::loadMoviesFromFile(movieList, lastSavedFile); // Automatically load default file
+    }
 
     if (movieList.empty()) {
         gui.createButton("No Movies Available", 50, 50, 500, 50);
@@ -26,7 +28,7 @@ void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
         }
     }
 
-    gui.createButton("Exit", 50, 50 + (movieList.size() * 50) + 70, 200, 50);
+    gui.createButton("Exit", 50, 50 + (movieList.size() * 70) + 70, 200, 50);
 }
 
 void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList) {
@@ -69,25 +71,19 @@ void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList) {
                     break;
                 }
 
-                case 2: {
-                    string filename;
-                    cout << "Enter filename to save movies (e.g., movies.txt): ";
-                    getline(cin, filename);
-                    Movie::saveMoviesToFile(movieList, filename);
+                case 2: { // Save Movies
+                    Movie::saveMoviesToFile(movieList, lastSavedFile);
+                    cout << "Movies saved to " << lastSavedFile << "!" << endl;
                     break;
                 }
-
-                case 3: {
-                    string filename;
-                    cout << "Enter filename to load movies (e.g., movies.txt): ";
-                    getline(cin, filename);
-                    Movie::loadMoviesFromFile(movieList, filename);
+                case 3: { // Load Movies
+                    Movie::loadMoviesFromFile(movieList, lastSavedFile);
+                    cout << "Movies loaded from " << lastSavedFile << "!" << endl;
                     break;
                 }
-
                 case 4:
                     gui.getWindow().close();
-                    break;
+                    return;
             }
         }
     }
@@ -97,11 +93,12 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
     for (size_t i = 0; i < gui.getButtonShapes().size(); ++i) {
         if (gui.isButtonPressed(*gui.getButtonShapes()[i], event)) {
             if (i == movieList.size()) {
-                gui.getWindow().close(); 
+                cout << "Thank you for visiting! Generating ticket placeholder...\n";
+                gui.getWindow().close();
+                return;
             } else {
                 Movie* selectedMovie = movieList[i];
 
-                
                 vector<string> showtimes = selectedMovie->getShowtimes();
                 int showtimeChoice = -1;
                 cout << "Select a showtime for \"" << selectedMovie->getTitle() << "\":" << endl;
@@ -150,55 +147,67 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
     }
 }
 
-
-
-
 int main() {
-    GUI gui;
     vector<Movie*> movieList;
 
-    string userChoice;
-    cout << "Are you an Admin or a Customer? (Enter 'admin' or 'customer'):" << endl;
-    cin >> userChoice;
-    cin.ignore();
+    bool running = true;
 
-    if (userChoice != "admin" && userChoice != "customer") {
-        cout << "Invalid choice. Exiting program." << endl;
-        return 1;
-    }
+    while (running) {
+        string userChoice;
+        cout << "Are you an Admin or a Customer? (Enter 'admin', 'customer', or 'exit'):" << endl;
+        cin >> userChoice;
+        cin.ignore();
 
-    if (userChoice == "admin") {
-        showAdminOptions(gui);  
-    } else if (userChoice == "customer") {
-        showCustomerOptions(gui, movieList); 
-    }
+        if (userChoice == "admin") {
+            GUI gui; 
+            showAdminOptions(gui);
 
-    Seating seating(5, 5);  
+            sf::Event event;
+            while (gui.getWindow().isOpen()) {
+                while (gui.getWindow().pollEvent(event)) {
+                    if (event.type == sf::Event::Closed) {
+                        gui.getWindow().close();
+                        break;
+                    }
 
-    sf::Event event;
-    while (gui.getWindow().isOpen()) {
-        while (gui.getWindow().pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                gui.getWindow().close();
+                    handleAdminActions(gui, event, movieList);
+                }
+
+                gui.display();
             }
+        } else if (userChoice == "customer") {
+            GUI gui;
+            showCustomerOptions(gui, movieList);
 
-            if (userChoice == "admin") {
-                handleAdminActions(gui, event, movieList); 
-            } else if (userChoice == "customer") {
-                handleCustomerActions(gui, event, movieList, seating);  
+            Seating seating(5, 5);
+            sf::Event event;
+            while (gui.getWindow().isOpen()) {
+                while (gui.getWindow().pollEvent(event)) {
+                    if (event.type == sf::Event::Closed) {
+                        gui.getWindow().close();
+                        break;
+                    }
+
+                    handleCustomerActions(gui, event, movieList, seating);
+                }
+
+                gui.display();
             }
+        } else if (userChoice == "exit") {
+            running = false;
+        } else {
+            cout << "Invalid choice. Please try again.\n";
         }
-
-        gui.display();  
     }
 
-    
     for (auto movie : movieList) {
         delete movie;
     }
 
     return 0;
 }
+
+
 
 
 
