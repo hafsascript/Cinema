@@ -26,6 +26,11 @@ public:
     vector<unique_ptr<sf::Text>>& getButtonLabels();
     void setFont(const sf::Font& font);
     void displayBookingConfirmation(const string& message);
+
+    void createFoodMenuButton(const string& label, float x, float y, float width, float height);
+    void displayTotalCost(float cost);
+    void createOrderButton(const string& label, float x, float y, float width, float height);
+    void displayFoodOrderMenu(const vector<string>& items, const vector<double>& prices);
 };
 
 #endif

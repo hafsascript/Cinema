@@ -1,5 +1,6 @@
 #include "gui.h"
 #include <iostream>
+#include <numeric>
 
 using namespace std;
 
@@ -68,5 +69,46 @@ void GUI::displayBookingConfirmation(const string& message) {
     confirmationText.setFillColor(sf::Color::White);
     window.draw(confirmationText);
 }
+void GUI::createFoodMenuButton(const string& label, float x, float y, float width, float height) {
+    auto button = make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
+    button->setPosition(x, y);
+    button->setFillColor(sf::Color::Yellow);  
+    buttons.push_back(std::move(button));
 
+    auto text = make_unique<sf::Text>();
+    text->setFont(font);
+    text->setString(label);
+    text->setCharacterSize(24);
+    text->setFillColor(sf::Color::Black);
+    text->setPosition(x + 10, y + 10);
+    buttonLabels.push_back(std::move(text));
+}
 
+void GUI::displayTotalCost(float cost) {
+    sf::Text totalCostText("Total Cost: $" + to_string(cost), font, 30);
+    totalCostText.setPosition(400, 600);
+    totalCostText.setFillColor(sf::Color::White);
+    window.draw(totalCostText);
+}
+
+void GUI::createOrderButton(const string& label, float x, float y, float width, float height) {
+    auto button = make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
+    button->setPosition(x, y);
+    button->setFillColor(sf::Color::Blue);  
+    buttons.push_back(std::move(button));
+
+    auto text = make_unique<sf::Text>();
+    text->setFont(font);
+    text->setString(label);
+    text->setCharacterSize(24);
+    text->setFillColor(sf::Color::Black);
+    text->setPosition(x + 10, y + 10);
+    buttonLabels.push_back(std::move(text));
+}
+
+void GUI::displayFoodOrderMenu(const vector<string>& items, const vector<double>& prices) {
+    for (size_t i = 0; i < items.size(); ++i) {
+        cout << items[i] << " - " << prices[i] << " USD" << endl;
+    }
+    cout << "Total: " << accumulate(prices.begin(), prices.end(), 0.0) << " USD" << endl;
+}

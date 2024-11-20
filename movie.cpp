@@ -4,8 +4,8 @@
 
 using namespace std;
 
-Movie::Movie(string title, string genre, const vector<string>& showtimes, int duration, string leadCast)
-    : title(title), genre(genre), showtimes(showtimes), duration(duration), leadCast(leadCast) {
+Movie::Movie(string title, string genre, const vector<string>& showtimes, int duration, string leadCast, double ticketPrice)
+    : title(title), genre(genre), showtimes(showtimes), duration(duration), leadCast(leadCast), ticketPrice(ticketPrice) {
     
     for (const auto& showtime : showtimes) {
         showtimeSeatingMap[showtime] = new Seating(5, 5);  
@@ -32,16 +32,24 @@ int Movie::getDuration() const {
     return duration;
 }
 
+double Movie::getTicketPrice() const {
+    return ticketPrice;  
+}
+
+void Movie::setTicketPrice(double price) {
+    ticketPrice = price;  
+}
+
 Seating* Movie::getSeatingForShowtime(const string& showtime) {
     if (showtimeSeatingMap.find(showtime) != showtimeSeatingMap.end()) {
-        return showtimeSeatingMap[showtime];
+        return showtimeSeatingMap[showtime];  
     }
     return nullptr;  
 }
 
 void Movie::addShowtime(const string& showtime) {
     showtimes.push_back(showtime);
-    showtimeSeatingMap[showtime] = new Seating(5, 5);  
+    showtimeSeatingMap[showtime] = new Seating(5, 5);  // Add seating for new showtime
 }
 
 void Movie::removeShowtime(const string& showtime) {
@@ -55,8 +63,8 @@ void Movie::removeShowtime(const string& showtime) {
     }
 }
 
-void Movie::addMovie(vector<Movie*>& movieList, const string& title, const string& genre, const vector<string>& showtimes, int duration, const string& leadCast) {
-    movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast));
+void Movie::addMovie(vector<Movie*>& movieList, const string& title, const string& genre, const vector<string>& showtimes, int duration, const string& leadCast, double ticketPrice) {
+    movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast, ticketPrice));  // Add movie with ticketPrice
     cout << "Movie \"" << title << "\" added successfully!" << endl;  
 }
 
@@ -71,8 +79,6 @@ void Movie::removeMovie(vector<Movie*>& movieList, const string& title) {
         }
     }
     cout << "Movie \"" << title << "\" not found!" << endl;  
-
-
 }
 
 void Movie::saveMoviesToFile(const vector<Movie*>& movieList, const string& filename) {
@@ -86,7 +92,8 @@ void Movie::saveMoviesToFile(const vector<Movie*>& movieList, const string& file
         outFile << movie->title << "\n"
                 << movie->genre << "\n"
                 << movie->leadCast << "\n"
-                << movie->duration << "\n";
+                << movie->duration << "\n"
+                << movie->ticketPrice << "\n"; 
         
         for (const auto& showtime : movie->showtimes) {
             outFile << showtime << ",";
@@ -97,7 +104,6 @@ void Movie::saveMoviesToFile(const vector<Movie*>& movieList, const string& file
     cout << "Movies saved to file \"" << filename << "\" successfully!" << endl;
 }
 
-
 void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename) {
     ifstream inFile(filename);
     if (!inFile) {
@@ -107,10 +113,12 @@ void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename
 
     string title, genre, leadCast, showtimesLine;
     int duration;
+    double ticketPrice;  
 
     while (getline(inFile, title) && getline(inFile, genre) && getline(inFile, leadCast) && inFile >> duration) {
         inFile.ignore();  
-
+        inFile >> ticketPrice;  
+        inFile.ignore();  
         
         bool movieExists = false;
         for (const auto& movie : movieList) {
@@ -123,9 +131,7 @@ void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename
         if (!movieExists) {
             cout << "Reading movie: " << title << ", Duration: " << duration << endl;
 
-            
             if (getline(inFile, showtimesLine)) {
-                
                 if (!showtimesLine.empty() && showtimesLine.back() == ',') {
                     showtimesLine.pop_back();
                 }
@@ -141,8 +147,7 @@ void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename
                     showtimes.push_back(showtimesLine);
                 }
 
-                
-                movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast));
+                movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast, ticketPrice));  // Create movie with ticket price
             }
         } else {
             cout << "Movie \"" << title << "\" already exists, not adding again." << endl;
@@ -152,10 +157,10 @@ void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename
 
     cout << "Movies loaded from file \"" << filename << "\" successfully!" << endl;
 
-    
     for (const auto& movie : movieList) {
         cout << "Title: " << movie->getTitle() << ", Genre: " << movie->getGenre() 
-             << ", Duration: " << movie->getDuration() << ", Lead Cast: " << movie->getLeadCast() << endl;
+             << ", Duration: " << movie->getDuration() << ", Lead Cast: " << movie->getLeadCast() 
+             << ", Ticket Price: $" << movie->getTicketPrice() << endl;
 
         cout << "Showtimes: ";
         for (const auto& showtime : movie->getShowtimes()) {
@@ -164,3 +169,4 @@ void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename
         cout << endl;
     }
 }
+
