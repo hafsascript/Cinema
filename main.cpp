@@ -5,6 +5,7 @@
 #include "seating.h"
 #include "fooditem.h"
 #include "receipt.h"
+#include "report.h"
 
 using namespace std;
 string lastSavedFile = "default_movies.txt";
@@ -18,6 +19,7 @@ void showAdminOptions(GUI& gui) {
     gui.createButton("Save Movies", 50, 260, 200, 50);
     gui.createButton("Load Movies", 50, 330, 200, 50);
     gui.createButton("Exit", 50, 400, 200, 50);
+    gui.createButton("Generate Report", 50, 500, 200, 50);
 }
 
 void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
@@ -37,7 +39,7 @@ void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
     gui.createButton("Exit", 50, 50 + (movieList.size() * 70) + 140, 200, 50);
 }
 
-void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList) {
+void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Report& report) {
     for (size_t i = 0; i < gui.getButtonShapes().size(); ++i) {
         if (gui.isButtonPressed(*gui.getButtonShapes()[i], event)) {
             switch (i) {
@@ -111,12 +113,15 @@ void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList) {
                 case 5:
                     gui.getWindow().close();
                     return;
+                case 6: // Generate Report
+                    report.generateReport(movieList);
+                    break;
             }
         }
     }
 }
 
-void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList, Seating& seating, Receipt& receipt) {
+void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList, Seating& seating, Receipt& receipt,Report& report) {
     bool seatSelected = false;
     bool foodOrderCompleted = false;
 
@@ -162,6 +167,9 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                                 if (seatSelected) {
                                     receipt.addTicket(selectedMovie->getTitle(), selectedMovie->getTicketPrice(), 1);
                                     cout << "Seat booked successfully! Ticket price: $" << selectedMovie->getTicketPrice() << endl;
+                                    
+                                    report.recordTicketSale(selectedMovie->getTitle(), 1, selectedMovie->getTicketPrice());
+
                                 }
                             }
                         }
@@ -198,6 +206,8 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                     } else if (choice >= 1 && choice <= foodMenu.size()) {
                         receipt.addItem(foodMenu[choice - 1].getName(), foodMenu[choice - 1].getPrice(), 1);
                         cout << "Added " << foodMenu[choice - 1].getName() << " to your order." << endl;
+                        report.recordFoodSale(foodMenu[choice - 1].getName(), foodMenu[choice - 1].getPrice());
+
                     } else {
                         cout << "Invalid choice. Try again." << endl;
                     }
@@ -218,6 +228,7 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
 int main() {
     vector<Movie*> movieList;
     bool running = true;
+    Report report;
 
     while (running) {
         string userChoice;
@@ -237,7 +248,7 @@ int main() {
                         break;
                     }
 
-                    handleAdminActions(gui, event, movieList);
+                    handleAdminActions(gui, event, movieList, report);
                 }
 
                 gui.display();
@@ -257,7 +268,7 @@ int main() {
                         break;
                     }
 
-                    handleCustomerActions(gui, event, movieList, seating, receipt);
+                    handleCustomerActions(gui, event, movieList, seating, receipt, report);
                 }
 
                 gui.display();
