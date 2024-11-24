@@ -19,12 +19,70 @@ void showAdminOptions(GUI& gui) {
     gui.createButton("Save Movies", 50, 260, 200, 50);
     gui.createButton("Load Movies", 50, 330, 200, 50);
     gui.createButton("Exit", 50, 400, 200, 50);
-    gui.createButton("Generate Report", 50, 500, 200, 50);
+    gui.createButton("Generate Report", 50, 470, 300, 50);
+}
+
+vector<Movie*> searchMovies(const vector<Movie*>& movieList) {
+    vector<Movie*> results;
+    int searchOption;
+
+    while (true) {
+        cout << "\nSearch movies by:\n";
+        cout << "1. Title\n";
+        cout << "2. Genre\n";
+        cout << "3. Showtimes\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+
+        if (!(cin >> searchOption) || searchOption < 0 || searchOption > 3) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please try again.\n";
+            continue;
+        }
+        cin.ignore();
+
+        if (searchOption == 0) {
+            break; 
+        }
+
+        string query;
+        cout << "Enter search query: ";
+        getline(cin, query);
+
+      
+        for (Movie* movie : movieList) {
+            if (searchOption == 1 && movie->getTitle().find(query) != string::npos) {
+                results.push_back(movie);
+            } else if (searchOption == 2 && movie->getGenre().find(query) != string::npos) {
+                results.push_back(movie);
+            } else if (searchOption == 3) {
+                for (const string& showtime : movie->getShowtimes()) {
+                    if (showtime.find(query) != string::npos) {
+                        results.push_back(movie);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (results.empty()) {
+            cout << "No movies found matching your query.\n";
+        } else {
+            cout << "\nMovies found:\n";
+            for (size_t i = 0; i < results.size(); ++i) {
+                cout << i + 1 << ". " << results[i]->getTitle() << " (" << results[i]->getGenre() << ")\n";
+            }
+        }
+        break; 
+    }
+
+    return results;
 }
 
 void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
     if (movieList.empty()) {
-        Movie::loadMoviesFromFile(movieList, lastSavedFile); 
+        Movie::loadMoviesFromFile(movieList, lastSavedFile);
     }
 
     if (movieList.empty()) {
@@ -35,10 +93,11 @@ void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
         }
     }
 
-    gui.createButton("View Menu", 50, 50 + (movieList.size() * 70) + 70, 200, 50);
-    gui.createButton("Exit", 50, 50 + (movieList.size() * 70) + 140, 200, 50);
+    
+    gui.createButton("Search Movies", 50, 50 + (movieList.size() * 70) + 70, 200, 50);
+    gui.createButton("View Menu", 50, 50 + (movieList.size() * 70) + 140, 200, 50);
+    gui.createButton("Exit", 50, 50 + (movieList.size() * 70) + 210, 200, 50);
 }
-
 void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Report& report) {
     for (size_t i = 0; i < gui.getButtonShapes().size(); ++i) {
         if (gui.isButtonPressed(*gui.getButtonShapes()[i], event)) {
@@ -113,7 +172,7 @@ void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Re
                 case 5:
                     gui.getWindow().close();
                     return;
-                case 6: // Generate Report
+                case 6: 
                     report.generateReport(movieList);
                     break;
             }
@@ -121,13 +180,16 @@ void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Re
     }
 }
 
-void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList, Seating& seating, Receipt& receipt,Report& report) {
+void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList, Seating& seating, Receipt& receipt, Report& report) {
     bool seatSelected = false;
     bool foodOrderCompleted = false;
 
     for (size_t i = 0; i < gui.getButtonShapes().size(); ++i) {
         if (gui.isButtonPressed(*gui.getButtonShapes()[i], event)) {
-           
+            cout << "Button pressed at index: " << i << endl;
+
+
+           \
             if (i < movieList.size()) {
                 Movie* selectedMovie = movieList[i];
                 vector<string> showtimes = selectedMovie->getShowtimes();
@@ -145,7 +207,7 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
 
                 cout << "Enter showtime number: ";
                 while (!(cin >> showtimeChoice) || showtimeChoice < 1 || showtimeChoice > showtimes.size()) {
-                    cin.clear(); 
+                    cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "Invalid choice. Enter a valid showtime number: ";
                 }
@@ -155,7 +217,6 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                 Seating* seatingForShowtime = selectedMovie->getSeatingForShowtime(selectedShowtime);
 
                 if (seatingForShowtime) {
-                    
                     while (!seatSelected) {
                         while (gui.getWindow().pollEvent(event)) {
                             if (event.type == sf::Event::Closed) {
@@ -167,9 +228,7 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                                 if (seatSelected) {
                                     receipt.addTicket(selectedMovie->getTitle(), selectedMovie->getTicketPrice(), 1);
                                     cout << "Seat booked successfully! Ticket price: $" << selectedMovie->getTicketPrice() << endl;
-                                    
                                     report.recordTicketSale(selectedMovie->getTitle(), 1, selectedMovie->getTicketPrice());
-
                                 }
                             }
                         }
@@ -181,8 +240,81 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                     cout << "No seating arrangement found for this showtime." << endl;
                 }
             }
-           
+
+            
             else if (i == movieList.size()) {
+                vector<Movie*> searchResults = searchMovies(movieList);
+                if (!searchResults.empty()) {
+                    cout << "\nSelect a movie from the search results:\n";
+                    for (size_t j = 0; j < searchResults.size(); ++j) {
+                        cout << j + 1 << ". " << searchResults[j]->getTitle() << endl;
+                    }
+
+                    int movieChoice = -1;
+                    while (true) {
+                        cout << "Enter movie number (or 0 to cancel): ";
+                        if (!(cin >> movieChoice) || movieChoice < 0 || movieChoice > searchResults.size()) {
+                            cin.clear();
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << "Invalid input. Please try again.\n";
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (movieChoice > 0) {
+                        Movie* selectedMovie = searchResults[movieChoice - 1];
+                        vector<string> showtimes = selectedMovie->getShowtimes();
+                        if (showtimes.empty()) {
+                            cout << "No showtimes available for this movie." << endl;
+                        } else {
+                            cout << "Select a showtime for \"" << selectedMovie->getTitle() << "\":" << endl;
+                            for (size_t k = 0; k < showtimes.size(); ++k) {
+                                cout << k + 1 << ". " << showtimes[k] << endl;
+                            }
+
+                            int showtimeChoice = -1;
+                            cout << "Enter showtime number: ";
+                            while (!(cin >> showtimeChoice) || showtimeChoice < 1 || showtimeChoice > showtimes.size()) {
+                                cin.clear();
+                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                cout << "Invalid choice. Enter a valid showtime number: ";
+                            }
+                            cin.ignore();
+
+                            string selectedShowtime = showtimes[showtimeChoice - 1];
+                            Seating* seatingForShowtime = selectedMovie->getSeatingForShowtime(selectedShowtime);
+
+                            if (seatingForShowtime) {
+                                while (!seatSelected) {
+                                    while (gui.getWindow().pollEvent(event)) {
+                                        if (event.type == sf::Event::Closed) {
+                                            gui.getWindow().close();
+                                            return;
+                                        }
+                                        if (event.type == sf::Event::MouseButtonPressed) {
+                                            seatSelected = seatingForShowtime->handleSeatSelection(event, 50, 250, 40, 40, 10);
+                                            if (seatSelected) {
+                                                receipt.addTicket(selectedMovie->getTitle(), selectedMovie->getTicketPrice(), 1);
+                                                cout << "Seat booked successfully! Ticket price: $" << selectedMovie->getTicketPrice() << endl;
+                                                report.recordTicketSale(selectedMovie->getTitle(), 1, selectedMovie->getTicketPrice());
+                                            }
+                                        }
+                                    }
+                                    gui.getWindow().clear();
+                                    seatingForShowtime->displaySeats(gui.getWindow(), 50, 250, 40, 40, 10);
+                                    gui.getWindow().display();
+                                }
+                            } else {
+                                cout << "No seating arrangement found for this showtime." << endl;
+                            }
+                        }
+                    }
+                }
+            }
+
+          
+             else if (i == movieList.size() + 1) {
                 while (!foodOrderCompleted) {
                     cout << "\n--- Food Menu ---" << endl;
                     if (foodMenu.empty()) {
@@ -207,14 +339,13 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                         receipt.addItem(foodMenu[choice - 1].getName(), foodMenu[choice - 1].getPrice(), 1);
                         cout << "Added " << foodMenu[choice - 1].getName() << " to your order." << endl;
                         report.recordFoodSale(foodMenu[choice - 1].getName(), foodMenu[choice - 1].getPrice());
-
                     } else {
                         cout << "Invalid choice. Try again." << endl;
                     }
                 }
             }
-
-            else if (i == movieList.size() + 1) {
+           
+            else if (i == movieList.size() + 2) {
                 cout << "Thank you for visiting!" << endl;
                 receipt.displayReceipt();
                 gui.getWindow().close();
@@ -223,6 +354,8 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
         }
     }
 }
+
+
 
 
 int main() {

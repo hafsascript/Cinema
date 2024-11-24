@@ -49,7 +49,7 @@ Seating* Movie::getSeatingForShowtime(const string& showtime) {
 
 void Movie::addShowtime(const string& showtime) {
     showtimes.push_back(showtime);
-    showtimeSeatingMap[showtime] = new Seating(5, 5);  // Add seating for new showtime
+    showtimeSeatingMap[showtime] = new Seating(5, 5); \
 }
 
 void Movie::removeShowtime(const string& showtime) {
@@ -64,7 +64,7 @@ void Movie::removeShowtime(const string& showtime) {
 }
 
 void Movie::addMovie(vector<Movie*>& movieList, const string& title, const string& genre, const vector<string>& showtimes, int duration, const string& leadCast, double ticketPrice) {
-    movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast, ticketPrice));  // Add movie with ticketPrice
+    movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast, ticketPrice));  \
     cout << "Movie \"" << title << "\" added successfully!" << endl;  
 }
 
@@ -147,7 +147,7 @@ void Movie::loadMoviesFromFile(vector<Movie*>& movieList, const string& filename
                     showtimes.push_back(showtimesLine);
                 }
 
-                movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast, ticketPrice));  // Create movie with ticket price
+                movieList.push_back(new Movie(title, genre, showtimes, duration, leadCast, ticketPrice)); 
             }
         } else {
             cout << "Movie \"" << title << "\" already exists, not adding again." << endl;
