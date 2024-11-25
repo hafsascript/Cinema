@@ -6,11 +6,13 @@
 #include "fooditem.h"
 #include "receipt.h"
 #include "report.h"
+#include "giftcard.h"
 
 using namespace std;
 string lastSavedFile = "default_movies.txt";
 
 vector<FoodItem> foodMenu;
+
 
 void showAdminOptions(GUI& gui) {
     gui.createButton("Add Movie", 50, 50, 200, 50);
@@ -20,6 +22,8 @@ void showAdminOptions(GUI& gui) {
     gui.createButton("Load Movies", 50, 330, 200, 50);
     gui.createButton("Exit", 50, 400, 200, 50);
     gui.createButton("Generate Report", 50, 470, 300, 50);
+    gui.createButton("Add Gift Card", 50, 540, 200, 50); 
+    gui.createButton("Check Gift Card Balance", 50, 610, 350, 50); 
 }
 
 vector<Movie*> searchMovies(const vector<Movie*>& movieList) {
@@ -98,7 +102,7 @@ void showCustomerOptions(GUI& gui, vector<Movie*>& movieList) {
     gui.createButton("View Menu", 50, 50 + (movieList.size() * 70) + 140, 200, 50);
     gui.createButton("Exit", 50, 50 + (movieList.size() * 70) + 210, 200, 50);
 }
-void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Report& report) {
+void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Report& report, GiftCard&giftCard) {
     for (size_t i = 0; i < gui.getButtonShapes().size(); ++i) {
         if (gui.isButtonPressed(*gui.getButtonShapes()[i], event)) {
             switch (i) {
@@ -175,12 +179,33 @@ void handleAdminActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList,Re
                 case 6: 
                     report.generateReport(movieList);
                     break;
+                case 7: { 
+                    string cardCode;
+                    float balance;
+                    cout << "Enter Gift Card Code: ";
+                    getline(cin, cardCode);
+                    cout << "Enter Gift Card Balance: ";
+                    cin >> balance;
+                    cin.ignore();
+                    giftCard.addGiftCard(cardCode, balance);  
+                    break;
+                }
+                case 8: { 
+                    string cardCode;
+                    cout << "Enter Gift Card Code: ";
+                    getline(cin, cardCode);
+                    float balance = giftCard.getBalance(cardCode);  
+                    if (balance > 0) {
+                        cout << "Gift Card Balance: $" << balance << endl;
+                    }
+                    break;
+                }
             }
         }
     }
 }
 
-void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList, Seating& seating, Receipt& receipt, Report& report) {
+void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList, Seating& seating, Receipt& receipt, Report& report,GiftCard&giftCard) {
     bool seatSelected = false;
     bool foodOrderCompleted = false;
 
@@ -349,7 +374,25 @@ void handleCustomerActions(GUI& gui, sf::Event& event, vector<Movie*>& movieList
                 cout << "Thank you for visiting!" << endl;
                 receipt.displayReceipt();
                 gui.getWindow().close();
-                return;
+                string useGiftCard;
+                cout << "Do you want to use a gift card for a discount? (yes/no): ";
+                getline(cin, useGiftCard);
+                
+                if (useGiftCard == "yes") {
+                    string cardCode;
+                    cout << "Enter Gift Card Code: ";
+                    getline(cin, cardCode);
+                    
+                    
+                    receipt.applyGiftCard(giftCard, cardCode);
+                    receipt.displayReceipt();  
+                }
+                else {
+                    cout << "No gift card used. Total remains: $" << receipt.getTotalCost() << endl;
+                }
+                
+                
+                
             }
         }
     }
@@ -362,6 +405,8 @@ int main() {
     vector<Movie*> movieList;
     bool running = true;
     Report report;
+    GiftCard giftCard;
+    
 
     while (running) {
         string userChoice;
@@ -381,7 +426,7 @@ int main() {
                         break;
                     }
 
-                    handleAdminActions(gui, event, movieList, report);
+                    handleAdminActions(gui, event, movieList, report, giftCard);
                 }
 
                 gui.display();
@@ -401,7 +446,7 @@ int main() {
                         break;
                     }
 
-                    handleCustomerActions(gui, event, movieList, seating, receipt, report);
+                    handleCustomerActions(gui, event, movieList, seating, receipt, report, giftCard);
                 }
 
                 gui.display();

@@ -9,44 +9,46 @@
 #include <iostream>
 #include "movie.h"
 
+using namespace std;
+
 
 class Report {
 private:
-    std::map<std::string, int> ticketSales; 
-    std::map<std::string, float> foodSales; 
+    map<string, int> ticketSales; 
+    map<string, float> foodSales; 
     float totalRevenue = 0.0;
 
 public:
     
-    void recordTicketSale(const std::string& movieTitle, int numTickets, float ticketPrice) {
+    void recordTicketSale(const string& movieTitle, int numTickets, float ticketPrice) {
         ticketSales[movieTitle] += numTickets;
         totalRevenue += numTickets * ticketPrice;
     }
 
     
-    void recordFoodSale(const std::string& foodItem, float price) {
+    void recordFoodSale(const string& foodItem, float price) {
         foodSales[foodItem] += price;
         totalRevenue += price;
     }
 
     
-    void generateReport(const std::vector<Movie*>& movieList) const {
-        std::cout << "\n--- Sales Report ---" << std::endl;
+    void generateReport(const vector<Movie*>& movieList) const {
+        cout << "\n--- Sales Report ---" << endl;
 
         
-        std::cout << "\nTicket Sales:" << std::endl;
+        cout << "\nTicket Sales:" << endl;
         for (const auto& sale : ticketSales) {
-            std::cout << "Movie: " << sale.first << ", Tickets Sold: " << sale.second << std::endl;
+            cout << "Movie: " << sale.first << ", Tickets Sold: " << sale.second << endl;
         }
 
         
-        std::cout << "\nFood Sales:" << std::endl;
+        cout << "\nFood Sales:" << endl;
         for (const auto& sale : foodSales) {
-            std::cout << "Food Item: " << sale.first << ", Total Revenue: $" << std::fixed << std::setprecision(2) << sale.second << std::endl;
+            cout << "Food Item: " << sale.first << ", Total Revenue: $" << fixed << setprecision(2) << sale.second << endl;
         }
 
         
-        std::cout << "\nTotal Revenue: $" << std::fixed << std::setprecision(2) << totalRevenue << std::endl;
+        cout << "\nTotal Revenue: $" << fixed << setprecision(2) << totalRevenue << endl;
 
         
         saveReportToFile();
@@ -54,9 +56,9 @@ public:
 
     
     void saveReportToFile() const {
-        std::ofstream outFile("report.txt");
+        ofstream outFile("report.txt");
         if (!outFile.is_open()) {
-            std::cerr << "Failed to open report file!" << std::endl;
+            cerr << "Failed to open report file!" << endl;
             return;
         }
 
@@ -69,13 +71,13 @@ public:
 
         outFile << "\nFood Sales:\n";
         for (const auto& sale : foodSales) {
-            outFile << "Food Item: " << sale.first << ", Total Revenue: $" << std::fixed << std::setprecision(2) << sale.second << "\n";
+            outFile << "Food Item: " << sale.first << ", Total Revenue: $" << fixed << setprecision(2) << sale.second << "\n";
         }
 
-        outFile << "\nTotal Revenue: $" << std::fixed << std::setprecision(2) << totalRevenue << "\n";
+        outFile << "\nTotal Revenue: $" << fixed << setprecision(2) << totalRevenue << "\n";
 
         outFile.close();
-        std::cout << "Report saved to 'report.txt'!" << std::endl;
+        cout << "Report saved to 'report.txt'!" << endl;
     }
 };
 
